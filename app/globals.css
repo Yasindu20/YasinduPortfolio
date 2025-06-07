@@ -29,6 +29,35 @@
   .gradient-text {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600;
   }
+  
+  /* 3D Perspective effects */
+  .perspective-effect {
+    perspective: 1000px;
+    transform-style: preserve-3d;
+  }
+  
+  /* Gallery hover effects */
+  .gallery-item-hover {
+    @apply transition-all duration-300 hover:z-10;
+    transform: scale(1);
+    filter: brightness(0.8);
+  }
+  
+  .gallery-item-hover:hover {
+    transform: scale(1.05) translateY(-10px);
+    filter: brightness(1.1);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+  
+  /* Image tilt effect */
+  .tilt-effect {
+    @apply transition-transform duration-300;
+    transform: perspective(1000px) rotateX(0) rotateY(0);
+  }
+  
+  .tilt-effect:hover {
+    transform: perspective(1000px) rotateX(5deg) rotateY(-5deg);
+  }
 }
 
 /* Smooth scrolling */
@@ -51,4 +80,24 @@ html {
 
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-gray-500 dark:bg-gray-500;
+}
+
+/* Animation for floating elements */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Glow animation */
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(124, 58, 237, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(124, 58, 237, 0.8);
+  }
 }
