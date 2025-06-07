@@ -5,8 +5,7 @@ export const projects = [
     description: "AI-powered fitness tracking app with 95% accuracy in activity detection",
     tech: ["React Native", "TypeScript", "Firebase", "TensorFlow.js"],
     image: "/fitness-warrior.jpg", // Add your image
-    liveUrl: "#",
-    githubUrl: "https://github.com/Yasindu20",
+    githubUrl: "https://github.com/Yasindu20/fitness-warrior",
     features: [
       "AI-powered step counter with 95% accuracy",
       "Real-time calorie tracking with food database",
@@ -20,8 +19,7 @@ export const projects = [
     description: "MERN stack movie discovery platform with AI-powered recommendations",
     tech: ["React", "Node.js", "MongoDB", "Express", "AI Integration"],
     image: "/movie-explorer.jpg",
-    liveUrl: "#",
-    githubUrl: "https://github.com/Yasindu20",
+    githubUrl: "https://github.com/Yasindu20/movie-explorer",
     features: [
       "AI-powered review system",
       "Personalized recommendations",
@@ -35,8 +33,7 @@ export const projects = [
     description: "Interactive 2D platformer combining math challenges with gameplay",
     tech: ["JavaScript", "HTML5 Canvas", "Game Development"],
     image: "/jumpy-math.jpg",
-    liveUrl: "#",
-    githubUrl: "https://github.com/Yasindu20",
+    githubUrl: "https://github.com/Yasindu20/jumpy-math-game",
     features: [
       "500+ dynamic math problems",
       "Responsive double jump system",
