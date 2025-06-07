@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { ExternalLink, Github } from 'lucide-react'
+import { Github } from 'lucide-react'
 import { projects } from '@/lib/data'
 import Image from 'next/image'
 
@@ -74,25 +74,15 @@ export default function Projects() {
                   ))}
                 </ul>
 
-                {/* Links */}
-                <div className="flex gap-4">
-                  <motion.a
-                    href={project.liveUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white text-sm transition-colors"
-                  >
-                    <ExternalLink size={16} /> Live Demo
-                  </motion.a>
+                {/* Source Code Button */}
+                <div className="flex justify-center">
                   <motion.a
                     href={project.githubUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="flex items-center gap-2 px-4 py-2 glass rounded-lg text-sm hover:bg-white/20 transition-colors"
+                    className="flex items-center gap-2 px-6 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white text-sm transition-colors neon-glow"
                   >
                     <Github size={16} /> Source Code
                   </motion.a>
