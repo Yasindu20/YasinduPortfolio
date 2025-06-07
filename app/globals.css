@@ -1,51 +1,34 @@
-@import "tailwindcss/preflight";
-@import "tailwindcss/utilities";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* CSS Variables for theming */
-:root {
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+  }
 }
 
-.dark {
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
-}
-
-/* Glassmorphism effect */
-.glass {
-  backdrop-filter: blur(12px);
-  background-color: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.dark .glass {
-  background-color: rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Neon glow effect */
-.neon-glow {
-  box-shadow: 0 0 15px rgba(124, 58, 237, 0.5);
-  transition: box-shadow 0.3s ease;
-}
-
-.neon-glow:hover {
-  box-shadow: 0 0 30px rgba(124, 58, 237, 0.7);
-}
-
-/* Gradient text */
-.gradient-text {
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-image: linear-gradient(to right, #c084fc, #db2777);
-}
-
-/* Base styles */
-body {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
+@layer utilities {
+  /* Glassmorphism effect */
+  .glass {
+    @apply backdrop-blur-md bg-white/10 dark:bg-black/10 border border-white/20 dark:border-white/10;
+  }
+  
+  /* Neon glow effect */
+  .neon-glow {
+    @apply shadow-[0_0_15px_rgba(124,58,237,0.5)] hover:shadow-[0_0_30px_rgba(124,58,237,0.7)];
+  }
+  
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600;
+  }
 }
 
 /* Smooth scrolling */
@@ -59,53 +42,13 @@ html {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f3f4f6;
-}
-
-.dark ::-webkit-scrollbar-track {
-  background: #111827;
+  @apply bg-gray-100 dark:bg-gray-900;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #9ca3af;
-  border-radius: 9999px;
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background: #4b5563;
+  @apply bg-gray-400 dark:bg-gray-600 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
-}
-
-/* Animation utilities */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
-}
-
-@keyframes glow {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-.animate-glow {
-  animation: glow 2s ease-in-out infinite;
+  @apply bg-gray-500 dark:bg-gray-500;
 }
