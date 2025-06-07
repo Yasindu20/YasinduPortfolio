@@ -8,6 +8,7 @@ const skillCategories = [
   { name: 'Backend', skills: skills.backend, color: 'from-green-400 to-blue-600' },
   { name: 'Database', skills: skills.database, color: 'from-yellow-400 to-orange-600' },
   { name: 'Tools', skills: skills.tools, color: 'from-pink-400 to-red-600' },
+  { name: 'Other', skills: skills.other, color: 'from-purple-400 to-indigo-600' }, // Added this line
 ]
 
 export default function Skills() {
@@ -36,7 +37,9 @@ export default function Skills() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: categoryIndex * 0.1 }}
-              className="glass rounded-xl p-6"
+              className={`glass rounded-xl p-6 ${
+                category.name === 'Other' ? 'md:col-span-2 max-w-md mx-auto' : ''
+              }`}
             >
               <h3 className={`text-2xl font-bold mb-4 bg-gradient-to-r ${category.color} bg-clip-text text-transparent`}>
                 {category.name}
