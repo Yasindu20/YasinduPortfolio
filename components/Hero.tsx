@@ -467,14 +467,48 @@ export default function Hero() {
     // Client-side only code for generating animation keyframes
     const style = document.createElement('style')
     style.textContent = `
-      @keyframes binaryRain {
-        0% { transform: translateY(-20px); }
-        100% { transform: translateY(100vh); }
-      }
-      
       @keyframes floatCode {
         0%, 100% { transform: translateY(0); }
         50% { transform: translateY(-15px); }
+      }
+      
+      @keyframes code-float-1 {
+        0%, 100% { transform: translateY(0) rotate(var(--rotate, 0deg)); }
+        50% { transform: translateY(-10px) rotate(var(--rotate, 0deg)); }
+      }
+      
+      @keyframes code-float-2 {
+        0%, 100% { transform: translateY(0) rotate(var(--rotate, 0deg)); }
+        50% { transform: translateY(-15px) rotate(var(--rotate, 0deg)); }
+      }
+      
+      @keyframes code-float-3 {
+        0%, 100% { transform: translateY(0) rotate(var(--rotate, 0deg)); }
+        50% { transform: translateY(-8px) rotate(var(--rotate, 0deg)); }
+      }
+      
+      .code-float-1 {
+        --rotate: 3deg;
+        animation: code-float-1 8s ease-in-out infinite;
+      }
+      
+      .code-float-2 {
+        --rotate: -2deg;
+        animation: code-float-2 10s ease-in-out infinite;
+      }
+      
+      .code-float-3 {
+        --rotate: 1deg;
+        animation: code-float-3 12s ease-in-out infinite;
+      }
+      
+      .grid-pattern {
+        animation: grid-float 20s linear infinite;
+      }
+      
+      @keyframes grid-float {
+        0% { background-position: 0 0; }
+        100% { background-position: 30px 30px; }
       }
     `
     document.head.appendChild(style)
@@ -544,153 +578,122 @@ export default function Hero() {
           }}
         />
         
-        {/* Animated code snippets */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute top-[10%] left-[5%] text-xs font-mono opacity-30 transform rotate-3">
-            const developer = {`{`} <br />
-            &nbsp;&nbsp;name: 'Yasindu', <br />
-            &nbsp;&nbsp;skills: ['React', 'Node.js'] <br />
-            {`}`};
-          </div>
-          <div className="absolute top-[40%] right-[8%] text-xs font-mono opacity-30 transform -rotate-2">
-            function buildAwesomeApp() {`{`} <br />
-            &nbsp;&nbsp;return innovation; <br />
-            {`}`}
-          </div>
-          <div className="absolute bottom-[15%] left-[20%] text-xs font-mono opacity-30 transform rotate-1">
-            import {`{`} creativity {`}`} from 'mind'; <br />
-            export const solution = creativity();
-          </div>
+        {/* Performance-optimized code snippets with CSS animations */}
+        <div className="absolute inset-0">
+          {isMounted && (
+            <>
+              <div className="absolute top-[10%] left-[5%] text-xs font-mono text-cyan-300/30 transform rotate-3 code-float-1">
+                const developer = {`{`} <br />
+                &nbsp;&nbsp;name: 'Yasindu', <br />
+                &nbsp;&nbsp;skills: ['React', 'Node.js'] <br />
+                {`}`};
+              </div>
+              <div className="absolute top-[30%] right-[10%] text-xs font-mono text-blue-300/30 transform -rotate-2 code-float-2">
+                function buildApp() {`{`} <br />
+                &nbsp;&nbsp;return innovation; <br />
+                {`}`}
+              </div>
+              <div className="absolute bottom-[25%] left-[15%] text-xs font-mono text-indigo-300/30 transform rotate-1 code-float-3">
+                import {`{`} creativity {`}`} from 'mind'; <br />
+                export const solution = creativity();
+              </div>
+              <div className="absolute top-[60%] right-[20%] text-xs font-mono text-purple-300/30 transform rotate-2 code-float-1" style={{ animationDelay: '1s' }}>
+                for (const idea of thoughts) {`{`} <br />
+                &nbsp;&nbsp;if (idea.isGreat) {`{`} <br />
+                &nbsp;&nbsp;&nbsp;&nbsp;buildProject(idea); <br />
+                &nbsp;&nbsp;{`}`} <br />
+                {`}`}
+              </div>
+              <div className="absolute top-[15%] right-[35%] text-xs font-mono text-cyan-300/30 transform -rotate-1 code-float-2" style={{ animationDelay: '0.5s' }}>
+                interface Developer {`{`} <br />
+                &nbsp;&nbsp;passion: boolean; <br />
+                &nbsp;&nbsp;skills: string[]; <br />
+                {`}`}
+              </div>
+              <div className="absolute bottom-[40%] left-[40%] text-xs font-mono text-blue-300/30 transform rotate-1 code-float-3" style={{ animationDelay: '1.5s' }}>
+                async function createValue() {`{`} <br />
+                &nbsp;&nbsp;await learn(); <br />
+                &nbsp;&nbsp;return implement(); <br />
+                {`}`}
+              </div>
+            </>
+          )}
         </div>
         
-        {/* Binary code rain effect - Client-side only rendering with isMounted check */}
-        <div className="absolute inset-0 overflow-hidden opacity-10">
-          {isMounted && Array.from({ length: 10 }).map((_, i) => {
-            // Generate a stable key for each rain element
-            const rainKey = `rain-${i}`;
-            // Use deterministic values based on indices
-            const leftPos = (i * 10) + (((i * 13) % 5) + 1);
-            const animDuration = 5 + ((i * 7) % 10);
-            const animDelay = i * 0.5;
+        {/* Simple code symbols with CSS animations instead of heavy JS animations */}
+        <div className="absolute inset-0 overflow-hidden">
+          {isMounted && ['<>', '{}', '()', '//', '[]', '=>', '==='].map((symbol, i) => {
+            // Position symbols in a distributed pattern
+            const row = Math.floor(i / 3);
+            const col = i % 3;
+            const top = 20 + (row * 30);
+            const left = 20 + (col * 30);
+            const animationClass = `code-float-${1 + (i % 3)}`;
+            const animationDelay = `${i * 0.3}s`;
             
             return (
-              <div 
-                key={rainKey}
-                className="absolute font-mono text-xs text-purple-300"
-                style={{
-                  top: `-20px`,
-                  left: `${leftPos}%`,
-                  animation: `binaryRain ${animDuration}s linear infinite`,
-                  animationDelay: `${animDelay}s`,
+              <div
+                key={`symbol-${i}-${symbol}`}
+                className={`absolute text-sm font-mono text-blue-300/15 ${animationClass}`}
+                style={{ 
+                  top: `${top}%`, 
+                  left: `${left}%`,
+                  animationDelay: animationDelay,
                 }}
               >
-                {Array.from({ length: 20 }).map((_, j) => {
-                  // Create deterministic binary pattern
-                  const isOne = ((i + j) % 3 === 0);
-                  const isHighOpacity = ((i + j) % 2 === 0);
-                  
-                  return (
-                    <div key={`${rainKey}-bit-${j}`} style={{ opacity: isHighOpacity ? 0.8 : 0.3 }}>
-                      {isOne ? '1' : '0'}
-                    </div>
-                  );
-                })}
+                {symbol}
               </div>
             );
           })}
         </div>
         
-        {/* Floating gradient orbs with tech theme */}
+        {/* Floating gradient orbs with tech theme - simplified for better performance */}
         <motion.div
           animate={{
-            scale: [1, 1.2, 1],
-            rotate: [0, 180, 360],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-          className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-radial from-blue-500/15 to-transparent rounded-full"
-          style={{
-            filter: 'blur(50px)',
-            transform: `translate(${cursorPosition.x / 10}px, ${cursorPosition.y / 10}px)`,
-          }}
-        />
-        
-        <motion.div
-          animate={{
-            scale: [1, 1.3, 1],
-            rotate: [360, 180, 0],
-            opacity: [0.3, 0.6, 0.3],
+            scale: [1, 1.1, 1],
+            opacity: [0.3, 0.4, 0.3],
           }}
           transition={{
             duration: 25,
             repeat: Infinity,
             ease: "linear"
           }}
-          className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-radial from-cyan-500/15 to-transparent rounded-full"
+          className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-radial from-blue-500/10 to-transparent rounded-full"
           style={{
             filter: 'blur(70px)',
-            transform: `translate(${-cursorPosition.x / 8}px, ${-cursorPosition.y / 8}px)`,
           }}
         />
         
-        {/* Interactive follow glow */}
-        <motion.div 
-          className="absolute w-[200px] h-[200px] rounded-full bg-blue-500/15"
+        <motion.div
+          animate={{
+            scale: [1, 1.15, 1],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{
+            duration: 30,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-radial from-cyan-500/10 to-transparent rounded-full"
           style={{
             filter: 'blur(80px)',
-            left: `calc(${cursorPosition.x}% - 100px)`,
-            top: `calc(${cursorPosition.y}% - 100px)`,
-            opacity: mouseInView ? 0.8 : 0,
-            transition: 'opacity 0.3s ease',
           }}
         />
         
-        {/* Tech-themed floating elements - Client-side only with isMounted check */}
-        <div className="absolute inset-0 overflow-hidden">
-          {isMounted && ['<>', '{}', '()', '//', '*/','[]', '||', '&&', '=>', '==='].map((symbol, i) => {
-            // Create deterministic positions and animations based on index
-            const yPos = 50 + ((i * 37) % 50);
-            const xPos = ((i * 23) % 100);
-            const yTarget = -50 - ((i * 29) % 50);
-            const rotateStart = ((i * 11) % 20) - 10;
-            const rotateEnd = ((i * 17) % 20) - 10;
-            const duration = 15 + ((i * 13) % 20);
-            const scale = 1 + ((i % 3) * 0.5);
-            
-            return (
-              <motion.div
-                key={`symbol-${i}-${symbol}`}
-                className="absolute text-xs md:text-sm font-mono text-blue-300/20"
-                initial={{ y: yPos, x: xPos - 50, opacity: 0.1 }}
-                animate={{ 
-                  y: [yPos, yTarget], 
-                  opacity: [0.1, 0.3, 0.1],
-                  rotate: [rotateStart, rotateEnd]
-                }}
-                transition={{ 
-                  repeat: Infinity, 
-                  duration: duration,
-                  repeatType: 'reverse',
-                  ease: 'linear'
-                }}
-                style={{ 
-                  left: `${xPos}%`, 
-                  top: `${yPos}%`,
-                  transform: `scale(${scale})`,
-                }}
-              >
-                {symbol}
-              </motion.div>
-            );
-          })}
-        </div>
+        {/* Interactive follow glow - simplified transform */}
+        {mouseInView && (
+          <div 
+            className="absolute w-[200px] h-[200px] rounded-full bg-blue-500/10 transition-all duration-300"
+            style={{
+              filter: 'blur(80px)',
+              left: `calc(${cursorPosition.x}% - 100px)`,
+              top: `calc(${cursorPosition.y}% - 100px)`,
+            }}
+          />
+        )}
         
-        {/* Particle system - Client-side only with isMounted check */}
-        {isMounted && Array.from({ length: 20 }).map((_, i) => {
+        {/* Reduced number of particles for better performance */}
+        {isMounted && Array.from({ length: 8 }).map((_, i) => {
           // Create deterministic values based on index
           const colorR = 100 + ((i * 17) % 50);
           const colorG = 150 + ((i * 23) % 50);
@@ -711,14 +714,12 @@ export default function Hero() {
           );
         })}
         
-        {/* Grid pattern - more tech-like */}
+        {/* Grid pattern - CSS-based instead of JS transform for better performance */}
         <div 
-          className="absolute inset-0 opacity-10"
+          className="absolute inset-0 opacity-10 grid-pattern"
           style={{
             backgroundImage: 'linear-gradient(to right, rgba(100, 200, 255, 0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(100, 200, 255, 0.1) 1px, transparent 1px)',
             backgroundSize: '30px 30px',
-            transform: `translate(${cursorPosition.x / 20}px, ${cursorPosition.y / 20}px)`,
-            transition: 'transform 0.3s ease-out',
           }}
         />
       </div>
