@@ -16,7 +16,10 @@ import {
   GraduationCap,
   BookOpen,
   Building2,
-  School
+  School,
+  CheckCircle2,
+  FileCheck,
+  Heart
 } from 'lucide-react'
 
 const highlights = [
@@ -43,6 +46,37 @@ const highlights = [
     title: "Continuous Learning",
     description: "Recent Software Engineering graduate with multiple certifications",
     color: "from-emerald-500 to-green-400"
+  }
+]
+
+// Added interests section to fill space
+const interests = [
+  "UI/UX Design", "Mobile App Development", 
+  "Web Development", "AI & Machine Learning",
+  "Full Stack Engineering", "Game Development", "SAAS Devlopment", "DevOps Engineering"
+]
+
+// Certifications data
+const certifications = [
+  {
+    title: "Diploma in HTML5, CSS3, JavaScript",
+    issuer: "Alison",
+    date: "June 2024"
+  },
+  {
+    title: "Full Stack React E-Commerce Project",
+    issuer: "GreatStack",
+    date: "May 2025"
+  },
+  {
+    title: "Postman Essential Training",
+    issuer: "LinkedIn Learning",
+    date: "May 2025"
+  },
+  {
+    title: "React JavaScript - Fundamental to Coding & New Beginning",
+    issuer: "Alison",
+    date: "November 2023"
   }
 ]
 
@@ -195,6 +229,58 @@ const TimelineItem = ({
         >
           {description}
         </motion.p>
+      </div>
+    </motion.div>
+  )
+}
+
+// New component for interest item with animation
+const InterestItem = ({ text, index }: { text: string, index: number }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: index * 0.1, duration: 0.5 }}
+      whileHover={{ scale: 1.05, y: -5 }}
+      className="flex items-center gap-2 bg-gradient-to-r from-purple-500/20 to-blue-500/20 
+                 px-3 py-2 rounded-full text-sm backdrop-blur-sm border border-white/10 shadow-lg"
+    >
+      <CheckCircle2 size={14} className="text-purple-400" />
+      <span>{text}</span>
+    </motion.div>
+  )
+}
+
+// Certification item component
+const CertificationItem = ({ title, issuer, date, index }: { 
+  title: string, 
+  issuer: string, 
+  date: string, 
+  index: number 
+}) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: index * 0.1, duration: 0.5 }}
+      whileHover={{ x: 5 }}
+      className="glass rounded-lg p-4 hover:bg-white/5 transition-colors"
+    >
+      <div className="flex items-start gap-3">
+        <motion.div
+          animate={{ scale: [1, 1.2, 1], rotate: [0, 5, 0] }}
+          transition={{ duration: 3, repeat: Infinity, delay: index * 0.2 }}
+          className="mt-1 text-cyan-400"
+        >
+          <FileCheck size={18} />
+        </motion.div>
+        <div>
+          <h4 className="font-medium text-gray-200">{title}</h4>
+          <div className="flex items-center justify-between mt-1">
+            <span className="text-sm text-blue-300">{issuer}</span>
+            <span className="text-xs text-gray-400 font-mono">{date}</span>
+          </div>
+        </div>
       </div>
     </motion.div>
   )
@@ -396,7 +482,7 @@ export default function About() {
           </h2>
         </motion.div>
 
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid lg:grid-cols-2 gap-12 items-start">
           {/* Left content - Bio with enhanced animations */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
@@ -497,20 +583,81 @@ export default function About() {
             </motion.div>
           </motion.div>
 
-          {/* Right content - Enhanced 3D highlight cards */}
-          <div className="grid grid-cols-2 gap-6">
-            <AnimatePresence>
-              {highlights.map((item, index) => (
-                <Enhanced3DCard 
-                  key={item.title}
-                  icon={item.icon}
-                  title={item.title}
-                  description={item.description}
-                  index={index}
-                  color={item.color}
-                />
-              ))}
-            </AnimatePresence>
+          {/* Right content - Enhanced with better space utilization */}
+          <div className="space-y-8">
+            {/* Skill cards with increased size */}
+            <div className="grid grid-cols-2 gap-6">
+              <AnimatePresence>
+                {highlights.map((item, index) => (
+                  <Enhanced3DCard 
+                    key={item.title}
+                    icon={item.icon}
+                    title={item.title}
+                    description={item.description}
+                    index={index}
+                    color={item.color}
+                  />
+                ))}
+              </AnimatePresence>
+            </div>
+            
+            {/* Added interest tags section to better fill the space */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="glass rounded-xl p-6 overflow-hidden"
+            >
+              <div className="flex items-center gap-2 mb-4">
+                <motion.div 
+                  className="w-8 h-8 bg-purple-500/20 rounded-full flex items-center justify-center"
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <Heart size={16} className="text-purple-400" />
+                </motion.div>
+                <h3 className="font-bold text-xl">Areas of Interest</h3>
+              </div>
+              
+              <div className="flex flex-wrap gap-3 mt-4">
+                {interests.map((interest, index) => (
+                  <InterestItem key={interest} text={interest} index={index} />
+                ))}
+              </div>
+            </motion.div>
+            
+            {/* Certifications section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="glass rounded-xl p-6 overflow-hidden"
+            >
+              <div className="flex items-center gap-2 mb-4">
+                <motion.div 
+                  className="w-8 h-8 bg-purple-500/20 rounded-full flex items-center justify-center"
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <FileCheck size={16} className="text-purple-400" />
+                </motion.div>
+                <h3 className="font-bold text-xl">Certifications</h3>
+              </div>
+              
+              <div className="space-y-3 mt-4">
+                {certifications.map((cert, index) => (
+                  <CertificationItem
+                    key={cert.title}
+                    title={cert.title}
+                    issuer={cert.issuer}
+                    date={cert.date}
+                    index={index}
+                  />
+                ))}
+              </div>
+            </motion.div>
           </div>
         </div>
         
