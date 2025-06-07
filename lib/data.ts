@@ -62,7 +62,7 @@ export const projects = [
       "/jumpy-math-leaderboard.jpg",
       "/jumpy-math-credits.jpg"
     ],
-    githubUrl: "https://github.com/Yasindu20/jumpy-math-game",
+    githubUrl: "https://github.com/Yasindu20/Jumpy-Math",
     features: [
       "500+ dynamic math problems",
       "Responsive double jump system",
