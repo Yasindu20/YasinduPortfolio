@@ -24,6 +24,22 @@ import {
 } from 'lucide-react'
 import { personalInfo } from '@/lib/data'
 
+// ClientOnly component to prevent hydration mismatch
+interface ClientOnlyProps {
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}
+
+function ClientOnly({ children, fallback = null }: ClientOnlyProps) {
+  const [isClient, setIsClient] = useState(false)
+  
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+  
+  return isClient ? children : fallback
+}
+
 // Define types for component props
 interface FloatingParticleProps {
   size?: number;
@@ -76,6 +92,10 @@ const FloatingParticle = ({
   left = '50%', 
   duration = 10 
 }: FloatingParticleProps) => {
+  // Static random values for server-client consistency
+  const staticYOffset = -300;
+  const staticXOffset = 0;
+  
   return (
     <motion.div
       className="absolute rounded-full pointer-events-none"
@@ -91,20 +111,20 @@ const FloatingParticle = ({
       animate={{ 
         opacity: [0, 0.8, 0],
         scale: [0, 1, 0.5],
-        y: -300 - Math.random() * 200,
-        x: Math.random() * 40 - 20
+        y: staticYOffset,
+        x: staticXOffset
       }}
       transition={{
         duration,
         delay,
         repeat: Infinity,
-        repeatDelay: Math.random() * 2
+        repeatDelay: 2
       }}
     />
   )
 }
 
-// Clock component
+// Clock component - Client-side only rendering
 const Clock = ({ size = 24, className = "" }: ClockProps) => {
   const [time, setTime] = useState(new Date())
 
@@ -164,15 +184,6 @@ const Clock = ({ size = 24, className = "" }: ClockProps) => {
   )
 }
 
-// Type definitions for component props
-interface FloatingCodeSnippetProps {
-  text: string;
-  top: string;
-  left: string;
-  delay?: number;
-  rotate?: number;
-}
-
 // Floating code snippet component
 const FloatingCodeSnippet = ({ text, top, left, delay = 0, rotate = 0 }: FloatingCodeSnippetProps) => {
   return (
@@ -196,7 +207,6 @@ const FloatingCodeSnippet = ({ text, top, left, delay = 0, rotate = 0 }: Floatin
   )
 }
 
-// 3D tilt card effect
 // 3D tilt card effect
 const TiltCard = ({ children, className = "", scale = 1.05, perspective = 1000, speed = 500 }: TiltCardProps) => {
   const [tilt, setTilt] = useState({ x: 0, y: 0 })
@@ -256,17 +266,17 @@ const TiltCard = ({ children, className = "", scale = 1.05, perspective = 1000, 
 }
 
 // Binary button effect
-// Binary button effect
 const BinaryButton = ({ children, onClick, isLoading = false, isSuccess = false }: BinaryButtonProps) => {
   const [isHovered, setIsHovered] = useState(false)
-  const [binary, setBinary] = useState<number[]>([]) // Add proper type annotation here
+  const [binary, setBinary] = useState<number[]>([]) 
   
   // Generate binary pattern when hovered
   useEffect(() => {
     if (isHovered) {
       const pattern: number[] = []
+      // Use fixed seed for server rendering
       for (let i = 0; i < 50; i++) {
-        pattern.push(Math.round(Math.random()))
+        pattern.push(i % 2) // Deterministic pattern instead of random
       }
       setBinary(pattern)
       
@@ -274,7 +284,8 @@ const BinaryButton = ({ children, onClick, isLoading = false, isSuccess = false 
       const interval = setInterval(() => {
         const newPattern: number[] = []
         for (let i = 0; i < 50; i++) {
-          newPattern.push(Math.round(Math.random()))
+          // Still somewhat random but with a predictable element
+          newPattern.push((i + Date.now()) % 2)
         }
         setBinary(newPattern)
       }, 200)
@@ -372,8 +383,8 @@ const BinaryButton = ({ children, onClick, isLoading = false, isSuccess = false 
                 initial={{ scale: 0, x: 0, y: 0 }}
                 animate={{ 
                   scale: [0, 1, 0],
-                  x: [0, (Math.random() - 0.5) * 200],
-                  y: [0, (Math.random() - 0.5) * 200]
+                  x: [0, (i % 2 === 0 ? 1 : -1) * (i * 20)], // Deterministic pattern
+                  y: [0, (i % 3 === 0 ? -1 : 1) * (i * 20)]  // Deterministic pattern
                 }}
                 exit={{ scale: 0 }}
                 transition={{ duration: 1, delay: i * 0.05 }}
@@ -388,21 +399,42 @@ const BinaryButton = ({ children, onClick, isLoading = false, isSuccess = false 
   )
 }
 
-// Animated data link effect
+// Animated data link effect - Client-side only
 const DataLinkEffect = () => {
+  // Predefined positions instead of random
+  const lineHeights = [150, 200, 170, 190, 160];
+  const linePositions = [
+    { top: '20%', left: '10%' },
+    { top: '35%', left: '30%' },
+    { top: '50%', left: '50%' },
+    { top: '30%', left: '70%' },
+    { top: '15%', left: '90%' }
+  ];
+  
+  const dotPositions = [
+    { top: '20%', left: '5%' },
+    { top: '50%', left: '20%' },
+    { top: '55%', left: '35%' },
+    { top: '40%', left: '50%' },
+    { top: '45%', left: '65%' },
+    { top: '40%', left: '80%' },
+    { top: '55%', left: '95%' },
+    { top: '60%', left: '110%' }
+  ];
+
   return (
     <div className="absolute inset-0 pointer-events-none">
-      {[...Array(5)].map((_, i) => (
+      {linePositions.map((pos, i) => (
         <motion.div
           key={i}
           className="absolute w-1 rounded-full bg-gradient-to-b from-purple-500/20 to-transparent"
           style={{
-            height: 100 + Math.random() * 150,
-            left: `${10 + i * 20}%`,
-            top: `${Math.random() * 70}%`,
+            height: lineHeights[i % lineHeights.length],
+            left: pos.left,
+            top: pos.top,
           }}
           animate={{
-            height: [100, 200, 100],
+            height: [lineHeights[i % lineHeights.length], lineHeights[i % lineHeights.length] * 1.3, lineHeights[i % lineHeights.length]],
             opacity: [0.2, 0.5, 0.2]
           }}
           transition={{
@@ -414,13 +446,13 @@ const DataLinkEffect = () => {
         />
       ))}
       
-      {[...Array(8)].map((_, i) => (
+      {dotPositions.map((pos, i) => (
         <motion.div
           key={i + "dot"}
           className="absolute w-2 h-2 rounded-full bg-blue-500/50"
           style={{
-            left: `${5 + i * 15}%`,
-            top: `${20 + Math.random() * 60}%`,
+            left: pos.left,
+            top: pos.top,
           }}
           animate={{
             y: [0, 100, 0],
@@ -438,7 +470,7 @@ const DataLinkEffect = () => {
   )
 }
 
-// Matrix rain effect
+// Matrix rain effect - Already client-side only
 const MatrixRain = () => {
   const [ready, setReady] = useState(false)
   
@@ -461,7 +493,7 @@ const MatrixRain = () => {
             opacity: 0.7
           }}
           animate={{ 
-            y: [0, window.innerHeight + 100],
+            y: [0, 1000], // Use fixed value instead of window.innerHeight
             opacity: [0.7, 0] 
           }}
           transition={{ 
@@ -471,7 +503,7 @@ const MatrixRain = () => {
         >
           {[...Array(20)].map((_, j) => (
             <div key={j} className="text-xs leading-none my-1">
-              {Math.random() > 0.5 ? '0' : '1'}
+              {(i + j) % 2 === 0 ? '0' : '1'} {/* Deterministic pattern */}
             </div>
           ))}
         </motion.div>
@@ -553,96 +585,98 @@ export default function Contact() {
 
   return (
     <section id="contact" ref={contactRef} className="py-20 bg-gradient-to-b from-gray-900/50 to-gray-800/50 relative overflow-hidden">
-      {/* Dynamic background effects */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Matrix code rain */}
-        <MatrixRain />
-        
-        {/* Data link effect */}
-        <DataLinkEffect />
-        
-        {/* Code snippets */}
-        {codeSnippets.map((code, index) => (
-          <FloatingCodeSnippet
-            key={index}
-            text={code.text}
-            top={code.top}
-            left={code.left}
-            delay={code.delay}
-            rotate={code.rotate}
-          />
-        ))}
-        
-        {/* Tech-themed symbols */}
-        {['{}', '<>', '()', '=>', '[]', '&&', '||'].map((symbol, i) => (
-          <motion.div
-            key={`symbol-${i}`}
-            className="absolute text-blue-300/20 font-mono"
+      {/* Dynamic background effects - Client-side only */}
+      <ClientOnly>
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {/* Matrix code rain */}
+          <MatrixRain />
+          
+          {/* Data link effect */}
+          <DataLinkEffect />
+          
+          {/* Code snippets */}
+          {codeSnippets.map((code, index) => (
+            <FloatingCodeSnippet
+              key={index}
+              text={code.text}
+              top={code.top}
+              left={code.left}
+              delay={code.delay}
+              rotate={code.rotate}
+            />
+          ))}
+          
+          {/* Tech-themed symbols */}
+          {['{}', '<>', '()', '=>', '[]', '&&', '||'].map((symbol, i) => (
+            <motion.div
+              key={`symbol-${i}`}
+              className="absolute text-blue-300/20 font-mono"
+              style={{ 
+                top: `${20 + i * 15}%`, 
+                left: `${10 + i * 18}%`,
+                fontSize: '12px',
+              }}
+              animate={{
+                y: [0, -15, 0],
+                opacity: [0.1, 0.3, 0.1]
+              }}
+              transition={{
+                duration: 5 + i,
+                repeat: Infinity,
+                repeatType: "reverse",
+              }}
+            >
+              {symbol}
+            </motion.div>
+          ))}
+          
+          {/* Floating particles */}
+          {[...Array(15)].map((_, i) => (
+            <FloatingParticle
+              key={i}
+              size={3 + (i * 0.25)} // Deterministic sizes
+              color={i % 3 === 0 
+                ? 'rgba(139, 92, 246, 0.5)' 
+                : i % 3 === 1 
+                  ? 'rgba(59, 130, 246, 0.5)' 
+                  : 'rgba(236, 72, 153, 0.5)'
+              }
+              delay={i * 0.2}
+              left={`${5 + (i * 6)}%`}
+              duration={8 + (i * 0.5)} // Deterministic durations
+            />
+          ))}
+          
+          {/* Gradient orbs */}
+          <motion.div 
+            className="absolute top-0 left-0 w-[500px] h-[500px] rounded-full opacity-30"
             style={{ 
-              top: `${20 + i * 15}%`, 
-              left: `${10 + i * 18}%`,
-              fontSize: '12px',
+              background: "radial-gradient(circle, rgba(139,92,246,0.15) 0%, rgba(30,27,75,0) 70%)",
+              filter: "blur(60px)",
             }}
-            animate={{
-              y: [0, -15, 0],
-              opacity: [0.1, 0.3, 0.1]
+            animate={{ 
+              scale: [1, 1.2, 1],
+              x: [0, 30, 0],
+              y: [0, 20, 0]
             }}
-            transition={{
-              duration: 5 + i,
-              repeat: Infinity,
-              repeatType: "reverse",
-            }}
-          >
-            {symbol}
-          </motion.div>
-        ))}
-        
-        {/* Floating particles */}
-        {[...Array(15)].map((_, i) => (
-          <FloatingParticle
-            key={i}
-            size={3 + Math.random() * 4}
-            color={i % 3 === 0 
-              ? 'rgba(139, 92, 246, 0.5)' 
-              : i % 3 === 1 
-                ? 'rgba(59, 130, 246, 0.5)' 
-                : 'rgba(236, 72, 153, 0.5)'
-            }
-            delay={i * 0.2}
-            left={`${5 + (i * 6)}%`}
-            duration={8 + Math.random() * 7}
+            transition={{ duration: 20, repeat: Infinity, repeatType: "mirror" }}
           />
-        ))}
-        
-        {/* Gradient orbs */}
-        <motion.div 
-          className="absolute top-0 left-0 w-[500px] h-[500px] rounded-full opacity-30"
-          style={{ 
-            background: "radial-gradient(circle, rgba(139,92,246,0.15) 0%, rgba(30,27,75,0) 70%)",
-            filter: "blur(60px)",
-          }}
-          animate={{ 
-            scale: [1, 1.2, 1],
-            x: [0, 30, 0],
-            y: [0, 20, 0]
-          }}
-          transition={{ duration: 20, repeat: Infinity, repeatType: "mirror" }}
-        />
-        
-        <motion.div 
-          className="absolute bottom-0 right-0 w-[600px] h-[600px] rounded-full opacity-20"
-          style={{ 
-            background: "radial-gradient(circle, rgba(56,189,248,0.15) 0%, rgba(30,27,75,0) 70%)",
-            filter: "blur(70px)",
-          }}
-          animate={{ 
-            scale: [1, 1.3, 1],
-            x: [0, -30, 0],
-            y: [0, -20, 0]
-          }}
-          transition={{ duration: 25, repeat: Infinity, repeatType: "mirror" }}
-        />
-      </div>
+          
+          <motion.div 
+            className="absolute bottom-0 right-0 w-[600px] h-[600px] rounded-full opacity-20"
+            style={{ 
+              background: "radial-gradient(circle, rgba(56,189,248,0.15) 0%, rgba(30,27,75,0) 70%)",
+              filter: "blur(70px)",
+            }}
+            animate={{ 
+              scale: [1, 1.3, 1],
+              x: [0, -30, 0],
+              y: [0, -20, 0]
+            }}
+            transition={{ duration: 25, repeat: Infinity, repeatType: "mirror" }}
+          />
+        </div>
+      </ClientOnly>
 
       <div className="container mx-auto px-6 relative z-10">
         {/* Animated section title */}
@@ -835,32 +869,34 @@ export default function Contact() {
                         <p className="font-semibold mt-1 text-lg">{personalInfo.email}</p>
                       </div>
                       
-                      {/* Moving particles on hover */}
-                      <motion.div 
-                        className="absolute inset-0 pointer-events-none"
-                        whileHover={{ opacity: 1 }}
-                      >
-                        {[...Array(5)].map((_, i) => (
-                          <motion.div
-                            key={i}
-                            className="absolute w-1 h-1 rounded-full bg-purple-400/30"
-                            style={{ 
-                              left: `${Math.random() * 100}%`, 
-                              top: `${Math.random() * 100}%`,
-                            }}
-                            animate={{ 
-                              x: [0, (Math.random() - 0.5) * 30],
-                              y: [0, (Math.random() - 0.5) * 30],
-                              opacity: [0, 0.5, 0]
-                            }}
-                            transition={{ 
-                              duration: 1 + Math.random(),
-                              repeat: Infinity,
-                              repeatType: "reverse"
-                            }}
-                          />
-                        ))}
-                      </motion.div>
+                      <ClientOnly>
+                        {/* Moving particles on hover */}
+                        <motion.div 
+                          className="absolute inset-0 pointer-events-none"
+                          whileHover={{ opacity: 1 }}
+                        >
+                          {[...Array(5)].map((_, i) => (
+                            <motion.div
+                              key={i}
+                              className="absolute w-1 h-1 rounded-full bg-purple-400/30"
+                              style={{ 
+                                left: `${20 * (i + 1)}%`, 
+                                top: `${15 * (i + 1)}%`,
+                              }}
+                              animate={{ 
+                                x: [0, i % 2 === 0 ? 15 : -15],
+                                y: [0, i % 2 === 0 ? -15 : 15],
+                                opacity: [0, 0.5, 0]
+                              }}
+                              transition={{ 
+                                duration: 1 + (i * 0.2),
+                                repeat: Infinity,
+                                repeatType: "reverse"
+                              }}
+                            />
+                          ))}
+                        </motion.div>
+                      </ClientOnly>
                     </motion.a>
                   </TiltCard>
 
@@ -1175,7 +1211,7 @@ export default function Contact() {
           
           {/* Floating tech elements */}
           {isInView && (
-            <>
+            <ClientOnly>
               <motion.div
                 className="absolute -left-16 top-1/3 w-32 h-32 opacity-10"
                 initial={{ opacity: 0, scale: 0 }}
@@ -1193,7 +1229,7 @@ export default function Contact() {
               >
                 <div className="w-full h-full rounded-full border-4 border-dashed border-blue-500" />
               </motion.div>
-            </>
+            </ClientOnly>
           )}
         </div>
         
@@ -1226,7 +1262,13 @@ export default function Contact() {
                   }}
                   transition={{ duration: 3, repeat: Infinity, delay: index * 0.5 }}
                 >
-                  <stat.icon className="text-purple-400" size={24} />
+                  {stat.icon === Clock ? (
+                    <ClientOnly>
+                      <Clock className="text-purple-400" size={24} />
+                    </ClientOnly>
+                  ) : (
+                    <stat.icon className="text-purple-400" size={24} />
+                  )}
                 </motion.div>
                 <h4 className="text-2xl font-bold text-white">{stat.value}</h4>
                 <p className="text-gray-400 text-sm">{stat.label}</p>
@@ -1240,7 +1282,7 @@ export default function Contact() {
               {`const statistics = {
   responseRate: 0.99,
   avgResponseTime: 24,
-  projectsCompleted: 65
+  projectsCompleted: 5
 };`}
             </div>
           </div>
