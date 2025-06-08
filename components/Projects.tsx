@@ -1,29 +1,32 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback, memo } from 'react'
 import { motion } from 'framer-motion'
 import { projects } from '@/lib/data'
 import ProjectGallery from './ProjectGallery'
 import ProjectCard from './ProjectCard'
 
+// Projects component with performance optimizations
 export default function Projects() {
   const [selectedProject, setSelectedProject] = useState<number | null>(null)
   
-  const openGallery = (projectId: number) => {
+  // Use useCallback for stable function references
+  const openGallery = useCallback((projectId: number) => {
     setSelectedProject(projectId)
-  }
+  }, [])
   
-  const closeGallery = () => {
+  const closeGallery = useCallback(() => {
     setSelectedProject(null)
-  }
+  }, [])
   
-  const getProjectImages = (projectId: number) => {
+  // Memoize this function since it's passed as prop
+  const getProjectImages = useCallback((projectId: number) => {
     const project = projects.find(p => p.id === projectId)
     if (!project) return []
     
     // Use the images array from the project data
     return project.images || [project.image]
-  }
+  }, [])
 
   return (
     <section id="projects" className="py-20">
@@ -31,7 +34,7 @@ export default function Projects() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: true, margin: "-50px" }} // Added margin for earlier loading
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
@@ -59,7 +62,7 @@ export default function Projects() {
         </div>
       </div>
       
-      {/* Project Gallery Modal */}
+      {/* Project Gallery Modal - Only render when needed */}
       {selectedProject !== null && (
         <ProjectGallery
           isOpen={selectedProject !== null}

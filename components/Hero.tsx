@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence } from 'framer-motion'
+import { useState, useEffect, useRef, useCallback, useMemo, memo } from 'react'
+import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion'
 import { Github, Linkedin, Mail, Download, ArrowRight, Sparkles, Code, Zap } from 'lucide-react'
 import { personalInfo } from '@/lib/data'
 
+// Using type definitions for better performance and type safety
 interface ParticleProps {
   delay?: number
   size?: number
@@ -43,7 +44,7 @@ interface AnimatedSocialIconProps {
   delay?: number
 }
 
-// Particle component for floating effects
+// Optimized Particle component
 const Particle = ({ delay = 0, size = 4, color = 'rgba(139, 92, 246, 0.5)', speed = 20 }: ParticleProps) => {
   // Use static initial values to avoid hydration mismatch
   const x = useMotionValue(50)
@@ -64,6 +65,7 @@ const Particle = ({ delay = 0, size = 4, color = 'rgba(139, 92, 246, 0.5)', spee
       y.set(Math.random() * 100)
     }
     
+    // Use longer interval for better performance
     const interval = setInterval(moveParticle, speed * 1000)
     return () => clearInterval(interval)
   }, [speed, x, y])
@@ -81,6 +83,7 @@ const Particle = ({ delay = 0, size = 4, color = 'rgba(139, 92, 246, 0.5)', spee
         filter: 'blur(1px)',
         x: springX,
         y: springY,
+        willChange: 'transform', // Add will-change hint
       }}
       initial={{ opacity: 0, scale: 0 }}
       animate={{ opacity: [0, 1, 0.5], scale: [0, 1.5, 1], rotate: [0, 180, 360] }}
@@ -94,13 +97,14 @@ const Particle = ({ delay = 0, size = 4, color = 'rgba(139, 92, 246, 0.5)', spee
   )
 }
 
-// 3D floating card with mouse tracking
-const FloatingCard = ({ children, delay = 0, intensity = 20 }: FloatingCardProps) => {
+// 3D floating card with mouse tracking - optimized
+const FloatingCard = memo(function FloatingCard({ children, delay = 0, intensity = 20 }: FloatingCardProps) {
   const cardRef = useRef<HTMLDivElement>(null)
   const [rotateX, setRotateX] = useState(0)
   const [rotateY, setRotateY] = useState(0)
   
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  // Throttled mouse move handler
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return
     
     const card = cardRef.current
@@ -110,23 +114,26 @@ const FloatingCard = ({ children, delay = 0, intensity = 20 }: FloatingCardProps
     const mouseX = e.clientX - cardCenterX
     const mouseY = e.clientY - cardCenterY
     
-    // Calculate rotation based on mouse position
+    // Calculate rotation based on mouse position - with optimization to avoid too frequent updates
     const rotateYValue = (mouseX / (rect.width / 2)) * intensity
     const rotateXValue = -(mouseY / (rect.height / 2)) * intensity
     
-    setRotateX(rotateXValue)
-    setRotateY(rotateYValue)
-  }
+    // Only update if change is significant (>0.5 degrees)
+    if (Math.abs(rotateXValue - rotateX) > 0.5 || Math.abs(rotateYValue - rotateY) > 0.5) {
+      setRotateX(rotateXValue)
+      setRotateY(rotateYValue)
+    }
+  }, [intensity, rotateX, rotateY])
   
-  const handleMouseLeave = () => {
+  const handleMouseLeave = useCallback(() => {
     setRotateX(0)
     setRotateY(0)
-  }
+  }, [])
   
   return (
     <motion.div
       ref={cardRef}
-      className="relative overflow-hidden"
+      className="relative overflow-hidden will-change-transform"
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, delay }}
@@ -149,12 +156,12 @@ const FloatingCard = ({ children, delay = 0, intensity = 20 }: FloatingCardProps
       </motion.div>
     </motion.div>
   )
-}
+})
 
-// Animated text reveal
-const AnimatedTextCharacter = ({ text, className = "", delay = 0 }: AnimatedTextCharacterProps) => {
+// Animated text reveal - optimized
+const AnimatedTextCharacter = memo(function AnimatedTextCharacter({ text, className = "", delay = 0 }: AnimatedTextCharacterProps) {
   // Split text into array of characters
-  const characters = text.split('')
+  const characters = useMemo(() => text.split(''), [text])
 
   // Variants for container
   const container = {
@@ -208,10 +215,10 @@ const AnimatedTextCharacter = ({ text, className = "", delay = 0 }: AnimatedText
       ))}
     </motion.h1>
   )
-}
+})
 
-// Glittery sparkle effect
-const Sparkle = ({ size, color, style }: SparkleProps) => {
+// Glittery sparkle effect - optimized
+const Sparkle = memo(function Sparkle({ size, color, style }: SparkleProps) {
   const sparkleVariants = {
     initial: { scale: 0 },
     animate: { scale: 1 },
@@ -227,7 +234,8 @@ const Sparkle = ({ size, color, style }: SparkleProps) => {
         borderRadius: '50%',
         backgroundColor: color,
         boxShadow: `0 0 ${size * 2}px ${size / 2}px ${color}`,
-        ...style
+        ...style,
+        willChange: 'transform, opacity',
       }}
       variants={sparkleVariants}
       initial="initial"
@@ -236,7 +244,7 @@ const Sparkle = ({ size, color, style }: SparkleProps) => {
       transition={{ duration: 0.5 }}
     />
   )
-}
+})
 
 // Define sparkle object type
 interface SparkleObject {
@@ -249,8 +257,8 @@ interface SparkleObject {
   };
 }
 
-// Client Component version of GradientButton - eliminates Math.random() during render
-const GradientButton = ({ children, href, download = false, primary = false }: GradientButtonProps) => {
+// Client Component version of GradientButton - optimized
+const GradientButton = memo(function GradientButton({ children, href, download = false, primary = false }: GradientButtonProps) {
   const [isHovered, setIsHovered] = useState(false)
   const [sparkles, setSparkles] = useState<SparkleObject[]>([])
   const [isMounted, setIsMounted] = useState(false)
@@ -260,7 +268,7 @@ const GradientButton = ({ children, href, download = false, primary = false }: G
     setIsMounted(true)
   }, [])
   
-  const addSparkle = () => {
+  const addSparkle = useCallback(() => {
     if (!isMounted) return
     
     const newSparkle: SparkleObject = {
@@ -279,17 +287,17 @@ const GradientButton = ({ children, href, download = false, primary = false }: G
     setTimeout(() => {
       setSparkles(prev => prev.filter(s => s.id !== newSparkle.id))
     }, 500)
-  }
+  }, [isMounted, primary])
   
-  const handleMouseEnter = () => {
+  const handleMouseEnter = useCallback(() => {
     setIsHovered(true)
-    // Add multiple sparkles when hovering
+    // Add multiple sparkles when hovering, but fewer for better performance
     if (isMounted) {
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 3; i++) { // Reduced from 5 to 3
         setTimeout(addSparkle, i * 100)
       }
     }
-  }
+  }, [addSparkle, isMounted])
   
   return (
     <motion.a
@@ -311,16 +319,15 @@ const GradientButton = ({ children, href, download = false, primary = false }: G
       }}
       whileTap={{ scale: 0.95 }}
     >
-      <AnimatePresence>
-        {sparkles.map(sparkle => (
-          <Sparkle
-            key={sparkle.id}
-            size={sparkle.size}
-            color={sparkle.color}
-            style={sparkle.style}
-          />
-        ))}
-      </AnimatePresence>
+      {/* Only render sparkles when hovered for better performance */}
+      {isHovered && sparkles.map(sparkle => (
+        <Sparkle
+          key={sparkle.id}
+          size={sparkle.size}
+          color={sparkle.color}
+          style={sparkle.style}
+        />
+      ))}
       
       <span className="relative z-10">{children}</span>
       
@@ -336,31 +343,40 @@ const GradientButton = ({ children, href, download = false, primary = false }: G
           backgroundPosition: isHovered ? '100% 50%' : '0% 50%' 
         }}
         transition={{ duration: 1.5, ease: 'easeInOut' }}
+        style={{ backgroundSize: '200% 200%' }}
       />
       
-      {/* Moving shine effect */}
-      <motion.div
-        className="absolute inset-0 overflow-hidden"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: isHovered ? 1 : 0 }}
-      >
+      {/* Moving shine effect - only when hovered */}
+      {isHovered && (
         <motion.div
-          className={`absolute h-full w-10 ${
-            primary ? 'bg-white/20' : 'bg-purple-500/20'
-          } blur-md transform -skew-x-12`}
-          initial={{ left: '-20%' }}
-          animate={{ left: isHovered ? '120%' : '-20%' }}
-          transition={{ duration: 1 }}
-        />
-      </motion.div>
+          className="absolute inset-0 overflow-hidden"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <motion.div
+            className={`absolute h-full w-10 ${
+              primary ? 'bg-white/20' : 'bg-purple-500/20'
+            } blur-md transform -skew-x-12`}
+            initial={{ left: '-20%' }}
+            animate={{ left: '120%' }}
+            transition={{ duration: 1 }}
+          />
+        </motion.div>
+      )}
     </motion.a>
   )
-}
+})
 
-// Social icon with enhanced animation
-const AnimatedSocialIcon = ({ Icon, href, delay = 0 }: AnimatedSocialIconProps) => {
+// Social icon with enhanced animation - optimized
+const AnimatedSocialIcon = memo(function AnimatedSocialIcon({ Icon, href, delay = 0 }: AnimatedSocialIconProps) {
   const [isHovered, setIsHovered] = useState(false)
   const [hasClicked, setHasClicked] = useState(false)
+  
+  // Handle click with useCallback
+  const handleClick = useCallback(() => {
+    setHasClicked(true)
+    setTimeout(() => setHasClicked(false), 1000)
+  }, [])
   
   return (
     <motion.a
@@ -384,21 +400,17 @@ const AnimatedSocialIcon = ({ Icon, href, delay = 0 }: AnimatedSocialIconProps) 
       }}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
-      onClick={() => {
-        setHasClicked(true)
-        setTimeout(() => setHasClicked(false), 1000)
-      }}
+      onClick={handleClick}
     >
-      <AnimatePresence>
-        {isHovered && (
-          <motion.div 
-            className="absolute inset-0 bg-gradient-to-tr from-purple-500/20 via-violet-500/20 to-fuchsia-500/20"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          />
-        )}
-      </AnimatePresence>
+      {/* Only render hover effects when needed */}
+      {isHovered && (
+        <motion.div 
+          className="absolute inset-0 bg-gradient-to-tr from-purple-500/20 via-violet-500/20 to-fuchsia-500/20"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        />
+      )}
       
       <motion.div
         animate={{
@@ -410,26 +422,26 @@ const AnimatedSocialIcon = ({ Icon, href, delay = 0 }: AnimatedSocialIconProps) 
         <Icon size={24} />
       </motion.div>
       
-      <AnimatePresence>
-        {hasClicked && (
-          <motion.div
-            className="absolute inset-0 bg-purple-500/20 rounded-full"
-            initial={{ scale: 0 }}
-            animate={{ scale: 2 }}
-            exit={{ scale: 0 }}
-            transition={{ duration: 0.5 }}
-          />
-        )}
-      </AnimatePresence>
+      {/* Only render click effect when needed */}
+      {hasClicked && (
+        <motion.div
+          className="absolute inset-0 bg-purple-500/20 rounded-full"
+          initial={{ scale: 0 }}
+          animate={{ scale: 2 }}
+          exit={{ scale: 0 }}
+          transition={{ duration: 0.5 }}
+        />
+      )}
     </motion.a>
   )
-}
+})
 
+// Main Hero component
 export default function Hero() {
   const [cursorPosition, setCursorPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
   const [hasScrolled, setHasScrolled] = useState(false)
   const [mouseInView, setMouseInView] = useState(false)
-  const [isMounted, setIsMounted] = useState(false) // Add this to track client-side mounting
+  const [isMounted, setIsMounted] = useState(false) 
   const heroRef = useRef<HTMLElement>(null)
   const titleRef = useRef<HTMLHeadingElement>(null)
   
@@ -438,87 +450,104 @@ export default function Hero() {
   const opacity = useTransform(scrollY, [0, 300], [1, 0])
   const translateY = useTransform(scrollY, [0, 300], [0, 100])
   
-  // For interactive animations
-  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+  // For interactive animations - throttled
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
     if (!heroRef.current) return
     
     const rect = heroRef.current.getBoundingClientRect()
     const x = ((e.clientX - rect.left) / rect.width) * 100
     const y = ((e.clientY - rect.top) / rect.height) * 100
     
-    setCursorPosition({ x, y })
-  }
+    // Only update if position changed significantly
+    setCursorPosition(prev => {
+      if (Math.abs(prev.x - x) > 2 || Math.abs(prev.y - y) > 2) {
+        return { x, y }
+      }
+      return prev
+    })
+  }, [])
   
   // Set the mounted state to true after component mounts
   useEffect(() => {
     setIsMounted(true)
   }, [])
 
+  // Handle scroll events - debounced
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
     const handleScroll = () => {
-      setHasScrolled(window.scrollY > 100)
-    }
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setHasScrolled(window.scrollY > 100);
+      }, 100);
+    };
     
     window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-  
-  useEffect(() => {
-    // Client-side only code for generating animation keyframes
-    const style = document.createElement('style')
-    style.textContent = `
-      @keyframes floatCode {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-15px); }
-      }
-      
-      @keyframes code-float-1 {
-        0%, 100% { transform: translateY(0) rotate(var(--rotate, 0deg)); }
-        50% { transform: translateY(-10px) rotate(var(--rotate, 0deg)); }
-      }
-      
-      @keyframes code-float-2 {
-        0%, 100% { transform: translateY(0) rotate(var(--rotate, 0deg)); }
-        50% { transform: translateY(-15px) rotate(var(--rotate, 0deg)); }
-      }
-      
-      @keyframes code-float-3 {
-        0%, 100% { transform: translateY(0) rotate(var(--rotate, 0deg)); }
-        50% { transform: translateY(-8px) rotate(var(--rotate, 0deg)); }
-      }
-      
-      .code-float-1 {
-        --rotate: 3deg;
-        animation: code-float-1 8s ease-in-out infinite;
-      }
-      
-      .code-float-2 {
-        --rotate: -2deg;
-        animation: code-float-2 10s ease-in-out infinite;
-      }
-      
-      .code-float-3 {
-        --rotate: 1deg;
-        animation: code-float-3 12s ease-in-out infinite;
-      }
-      
-      .grid-pattern {
-        animation: grid-float 20s linear infinite;
-      }
-      
-      @keyframes grid-float {
-        0% { background-position: 0 0; }
-        100% { background-position: 30px 30px; }
-      }
-    `
-    document.head.appendChild(style)
-    
     return () => {
-      document.head.removeChild(style)
+      clearTimeout(timeoutId);
+      window.removeEventListener('scroll', handleScroll)
     }
   }, [])
   
-  // Typing effect
+  // Add CSS animations once on mount
+  useEffect(() => {
+    // Client-side only code for generating animation keyframes
+    if (typeof document !== 'undefined') {
+      // Check if style already exists
+      if (!document.getElementById('hero-animations')) {
+        const style = document.createElement('style')
+        style.id = 'hero-animations'
+        style.textContent = `
+          @keyframes floatCode {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+          }
+          
+          @keyframes code-float-1 {
+            0%, 100% { transform: translateY(0) rotate(var(--rotate, 0deg)); }
+            50% { transform: translateY(-10px) rotate(var(--rotate, 0deg)); }
+          }
+          
+          @keyframes code-float-2 {
+            0%, 100% { transform: translateY(0) rotate(var(--rotate, 0deg)); }
+            50% { transform: translateY(-15px) rotate(var(--rotate, 0deg)); }
+          }
+          
+          @keyframes code-float-3 {
+            0%, 100% { transform: translateY(0) rotate(var(--rotate, 0deg)); }
+            50% { transform: translateY(-8px) rotate(var(--rotate, 0deg)); }
+          }
+          
+          .code-float-1 {
+            --rotate: 3deg;
+            animation: code-float-1 8s ease-in-out infinite;
+          }
+          
+          .code-float-2 {
+            --rotate: -2deg;
+            animation: code-float-2 10s ease-in-out infinite;
+          }
+          
+          .code-float-3 {
+            --rotate: 1deg;
+            animation: code-float-3 12s ease-in-out infinite;
+          }
+          
+          .grid-pattern {
+            animation: grid-float 20s linear infinite;
+          }
+          
+          @keyframes grid-float {
+            0% { background-position: 0 0; }
+            100% { background-position: 30px 30px; }
+          }
+        `
+        document.head.appendChild(style)
+      }
+    }
+  }, [])
+  
+  // Typing effect - optimized
   const [displayedTitle, setDisplayedTitle] = useState("")
   const [isTypingComplete, setIsTypingComplete] = useState(false)
   const [displayedSubtitle, setDisplayedSubtitle] = useState("")
@@ -556,6 +585,31 @@ export default function Hero() {
     return () => clearInterval(subtitleInterval)
   }, [isTypingComplete, fullSubtitle])
 
+  // Memoize static code snippets
+  const codeSnippets = useMemo(() => {
+    if (!isMounted) return null;
+    
+    return (
+      <>
+        <div className="absolute top-[10%] left-[5%] text-xs font-mono text-cyan-300/30 transform rotate-3 code-float-1">
+          const developer = {`{`} <br />
+          &nbsp;&nbsp;name: 'Yasindu', <br />
+          &nbsp;&nbsp;skills: ['React', 'Node.js'] <br />
+          {`}`};
+        </div>
+        <div className="absolute top-[30%] right-[10%] text-xs font-mono text-blue-300/30 transform -rotate-2 code-float-2">
+          function buildApp() {`{`} <br />
+          &nbsp;&nbsp;return innovation; <br />
+          {`}`}
+        </div>
+        <div className="absolute bottom-[25%] left-[15%] text-xs font-mono text-indigo-300/30 transform rotate-1 code-float-3">
+          import {`{`} creativity {`}`} from 'mind'; <br />
+          export const solution = creativity();
+        </div>
+      </>
+    )
+  }, [isMounted])
+
   return (
     <section 
       id="home" 
@@ -565,7 +619,7 @@ export default function Hero() {
       onMouseEnter={() => setMouseInView(true)}
       onMouseLeave={() => setMouseInView(false)}
     >
-      {/* Interactive background elements */}
+      {/* Interactive background elements - reduced and optimized */}
       <div className="absolute inset-0 pointer-events-none">
         {/* Code-themed background with animated gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-purple-900/20 to-indigo-900/30" />
@@ -580,71 +634,7 @@ export default function Hero() {
         
         {/* Performance-optimized code snippets with CSS animations */}
         <div className="absolute inset-0">
-          {isMounted && (
-            <>
-              <div className="absolute top-[10%] left-[5%] text-xs font-mono text-cyan-300/30 transform rotate-3 code-float-1">
-                const developer = {`{`} <br />
-                &nbsp;&nbsp;name: 'Yasindu', <br />
-                &nbsp;&nbsp;skills: ['React', 'Node.js'] <br />
-                {`}`};
-              </div>
-              <div className="absolute top-[30%] right-[10%] text-xs font-mono text-blue-300/30 transform -rotate-2 code-float-2">
-                function buildApp() {`{`} <br />
-                &nbsp;&nbsp;return innovation; <br />
-                {`}`}
-              </div>
-              <div className="absolute bottom-[25%] left-[15%] text-xs font-mono text-indigo-300/30 transform rotate-1 code-float-3">
-                import {`{`} creativity {`}`} from 'mind'; <br />
-                export const solution = creativity();
-              </div>
-              <div className="absolute top-[60%] right-[20%] text-xs font-mono text-purple-300/30 transform rotate-2 code-float-1" style={{ animationDelay: '1s' }}>
-                for (const idea of thoughts) {`{`} <br />
-                &nbsp;&nbsp;if (idea.isGreat) {`{`} <br />
-                &nbsp;&nbsp;&nbsp;&nbsp;buildProject(idea); <br />
-                &nbsp;&nbsp;{`}`} <br />
-                {`}`}
-              </div>
-              <div className="absolute top-[15%] right-[35%] text-xs font-mono text-cyan-300/30 transform -rotate-1 code-float-2" style={{ animationDelay: '0.5s' }}>
-                interface Developer {`{`} <br />
-                &nbsp;&nbsp;passion: boolean; <br />
-                &nbsp;&nbsp;skills: string[]; <br />
-                {`}`}
-              </div>
-              <div className="absolute bottom-[40%] left-[40%] text-xs font-mono text-blue-300/30 transform rotate-1 code-float-3" style={{ animationDelay: '1.5s' }}>
-                async function createValue() {`{`} <br />
-                &nbsp;&nbsp;await learn(); <br />
-                &nbsp;&nbsp;return implement(); <br />
-                {`}`}
-              </div>
-            </>
-          )}
-        </div>
-        
-        {/* Simple code symbols with CSS animations instead of heavy JS animations */}
-        <div className="absolute inset-0 overflow-hidden">
-          {isMounted && ['<>', '{}', '()', '//', '[]', '=>', '==='].map((symbol, i) => {
-            // Position symbols in a distributed pattern
-            const row = Math.floor(i / 3);
-            const col = i % 3;
-            const top = 20 + (row * 30);
-            const left = 20 + (col * 30);
-            const animationClass = `code-float-${1 + (i % 3)}`;
-            const animationDelay = `${i * 0.3}s`;
-            
-            return (
-              <div
-                key={`symbol-${i}-${symbol}`}
-                className={`absolute text-sm font-mono text-blue-300/15 ${animationClass}`}
-                style={{ 
-                  top: `${top}%`, 
-                  left: `${left}%`,
-                  animationDelay: animationDelay,
-                }}
-              >
-                {symbol}
-              </div>
-            );
-          })}
+          {codeSnippets}
         </div>
         
         {/* Floating gradient orbs with tech theme - simplified for better performance */}
@@ -661,26 +651,11 @@ export default function Hero() {
           className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-radial from-blue-500/10 to-transparent rounded-full"
           style={{
             filter: 'blur(70px)',
+            willChange: 'transform, opacity',
           }}
         />
         
-        <motion.div
-          animate={{
-            scale: [1, 1.15, 1],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{
-            duration: 30,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-          className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-radial from-cyan-500/10 to-transparent rounded-full"
-          style={{
-            filter: 'blur(80px)',
-          }}
-        />
-        
-        {/* Interactive follow glow - simplified transform */}
+        {/* Interactive follow glow - only render when mouse is in view */}
         {mouseInView && (
           <div 
             className="absolute w-[200px] h-[200px] rounded-full bg-blue-500/10 transition-all duration-300"
@@ -688,12 +663,13 @@ export default function Hero() {
               filter: 'blur(80px)',
               left: `calc(${cursorPosition.x}% - 100px)`,
               top: `calc(${cursorPosition.y}% - 100px)`,
+              willChange: 'transform',
             }}
           />
         )}
         
-        {/* Reduced number of particles for better performance */}
-        {isMounted && Array.from({ length: 8 }).map((_, i) => {
+        {/* Reduced particles for better performance */}
+        {isMounted && Array.from({ length: 5 }).map((_, i) => {
           // Create deterministic values based on index
           const colorR = 100 + ((i * 17) % 50);
           const colorG = 150 + ((i * 23) % 50);
@@ -765,60 +741,59 @@ export default function Hero() {
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   display: 'inline-block',
+                  willChange: 'background-position',
                 }}
               >
                 {personalInfo.name.split(' ')[0]}
               </motion.span>
             </motion.div>
             
-            {/* Sparkles around name - Client-side only with isMounted check */}
-            <motion.div 
-              className="absolute top-0 left-0 right-0 pointer-events-none"
-              animate={{
-                filter: ['blur(2px)', 'blur(3px)', 'blur(2px)'],
-                opacity: [0.5, 0.7, 0.5],
-              }}
-              transition={{ duration: 3, repeat: Infinity }}
-            >
-              <h1 className="text-5xl md:text-7xl font-bold mb-4 opacity-0">
-                Hi, I'm {personalInfo.name.split(' ')[0]}
-              </h1>
-              
-              {isMounted && [...Array(5)].map((_, i) => {
-                // Create deterministic positions based on index
-                const topPos = ((i * 23) % 100);
-                const leftOffset = ((i * 17) % 20) - 10;
-                const leftPos = 50 + leftOffset;
-                const delay = i * 0.5;
-                const repeatDelay = 1 + ((i * 13) % 5);
-                
-                return (
-                  <motion.div
-                    key={`sparkle-${i}`}
-                    className="absolute inline-block"
-                    style={{ 
-                      top: `${topPos}%`, 
-                      left: `${leftPos}%`,
-                      width: '4px',
-                      height: '4px',
-                      backgroundColor: 'rgba(100, 200, 255, 0.8)',
-                      borderRadius: '50%',
-                      boxShadow: '0 0 10px 2px rgba(100, 200, 255, 0.8)',
-                    }}
-                    animate={{
-                      opacity: [0, 1, 0],
-                      scale: [0, 1, 0],
-                    }}
-                    transition={{
-                      duration: 2,
-                      delay: delay,
-                      repeat: Infinity,
-                      repeatDelay: repeatDelay,
-                    }}
-                  />
-                );
-              })}
-            </motion.div>
+            {/* Simplified sparkles - reduced number */}
+            {isMounted && (
+              <motion.div 
+                className="absolute top-0 left-0 right-0 pointer-events-none"
+                animate={{
+                  filter: ['blur(2px)', 'blur(3px)', 'blur(2px)'],
+                  opacity: [0.5, 0.7, 0.5],
+                }}
+                transition={{ duration: 3, repeat: Infinity }}
+              >
+                {[...Array(3)].map((_, i) => { // Reduced from 5 to 3
+                  // Create deterministic positions based on index
+                  const topPos = ((i * 23) % 100);
+                  const leftOffset = ((i * 17) % 20) - 10;
+                  const leftPos = 50 + leftOffset;
+                  const delay = i * 0.5;
+                  
+                  return (
+                    <motion.div
+                      key={`sparkle-${i}`}
+                      className="absolute inline-block"
+                      style={{ 
+                        top: `${topPos}%`, 
+                        left: `${leftPos}%`,
+                        width: '4px',
+                        height: '4px',
+                        backgroundColor: 'rgba(100, 200, 255, 0.8)',
+                        borderRadius: '50%',
+                        boxShadow: '0 0 10px 2px rgba(100, 200, 255, 0.8)',
+                        willChange: 'transform, opacity',
+                      }}
+                      animate={{
+                        opacity: [0, 1, 0],
+                        scale: [0, 1, 0],
+                      }}
+                      transition={{
+                        duration: 2,
+                        delay: delay,
+                        repeat: Infinity,
+                        repeatDelay: 3,
+                      }}
+                    />
+                  );
+                })}
+              </motion.div>
+            )}
           </motion.div>
 
           {/* Typewriter effect for title */}
@@ -966,59 +941,45 @@ export default function Hero() {
           </div>
         </motion.div>
 
-        {/* Enhanced Scroll Indicator */}
-        <motion.div
-          animate={{
-            y: [0, 10, 0],
-            opacity: hasScrolled ? 0 : 1,
-            scale: hasScrolled ? 0.8 : 1,
-          }}
-          transition={{
-            y: { duration: 2, repeat: Infinity, ease: "easeInOut" },
-            opacity: { duration: 0.3 },
-            scale: { duration: 0.3 }
-          }}
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
-        >
-          <motion.div 
-            className="relative w-6 h-10 border-2 border-blue-400 rounded-full flex justify-center overflow-hidden"
-            whileHover={{ borderColor: '#3b82f6', scale: 1.1 }}
+        {/* Enhanced Scroll Indicator - only show when not scrolled */}
+        {!hasScrolled && (
+          <motion.div
+            animate={{
+              y: [0, 10, 0],
+              opacity: 1,
+              scale: 1,
+            }}
+            transition={{
+              y: { duration: 2, repeat: Infinity, ease: "easeInOut" },
+            }}
+            className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
           >
             <motion.div 
-              className="w-1 h-3 bg-blue-400 rounded-full"
-              initial={{ y: -10 }}
-              animate={{ y: 16 }}
-              transition={{ 
-                duration: 1.5, 
-                repeat: Infinity, 
-                repeatType: "loop",
-                ease: "easeInOut" 
-              }}
-            />
+              className="relative w-6 h-10 border-2 border-blue-400 rounded-full flex justify-center overflow-hidden"
+              whileHover={{ borderColor: '#3b82f6', scale: 1.1 }}
+            >
+              <motion.div 
+                className="w-1 h-3 bg-blue-400 rounded-full"
+                initial={{ y: -10 }}
+                animate={{ y: 16 }}
+                transition={{ 
+                  duration: 1.5, 
+                  repeat: Infinity, 
+                  repeatType: "loop",
+                  ease: "easeInOut" 
+                }}
+              />
+            </motion.div>
             
-            {/* Light trail effect */}
-            <motion.div 
-              className="absolute w-1 h-10 bg-gradient-to-b from-blue-400/0 via-blue-400/50 to-blue-400/0"
-              initial={{ y: -10, opacity: 0 }}
-              animate={{ y: 16, opacity: [0, 1, 0] }}
-              transition={{ 
-                duration: 1.5, 
-                repeat: Infinity, 
-                repeatType: "loop",
-                ease: "easeInOut" 
-              }}
-            />
+            <motion.p
+              className="text-xs text-gray-400 mt-2 text-center"
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
+            >
+              Scroll Down
+            </motion.p>
           </motion.div>
-          
-          {/* Scroll text */}
-          <motion.p
-            className="text-xs text-gray-400 mt-2 text-center"
-            animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
-          >
-            Scroll Down
-          </motion.p>
-        </motion.div>
+        )}
       </div>
     </section>
   )

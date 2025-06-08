@@ -6,11 +6,26 @@
   :root {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
+    
+    /* Add CSS variables for animations and transitions */
+    --animation-speed-fast: 0.2s;
+    --animation-speed-normal: 0.3s;
+    --animation-speed-slow: 0.5s;
+    
+    /* Add performance-optimized color variables */
+    --color-purple-glow: rgba(124, 58, 237, 0.5);
+    --color-blue-glow: rgba(59, 130, 246, 0.5);
   }
 
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
+  }
+  
+  /* Optimize rendering with content-visibility for off-screen content */
+  section {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 500px; /* Provide size hint */
   }
 }
 
@@ -20,27 +35,31 @@
     @apply backdrop-blur-md bg-white/10 dark:bg-black/10 border border-white/20 dark:border-white/10;
   }
   
-  /* Neon glow effect */
+  /* Neon glow effect - optimized with CSS variables */
   .neon-glow {
-    @apply shadow-[0_0_15px_rgba(124,58,237,0.5)] hover:shadow-[0_0_30px_rgba(124,58,237,0.7)];
+    @apply shadow-[0_0_15px_var(--color-purple-glow)] hover:shadow-[0_0_30px_var(--color-purple-glow)];
+    transition: box-shadow var(--animation-speed-normal) ease;
   }
   
   /* Gradient text */
   .gradient-text {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600;
+    will-change: background-position;
   }
   
-  /* 3D Perspective effects */
+  /* 3D Perspective effects - GPU-accelerated */
   .perspective-effect {
     perspective: 1000px;
     transform-style: preserve-3d;
+    will-change: transform;
   }
   
-  /* Gallery hover effects */
+  /* Gallery hover effects - simplified for better performance */
   .gallery-item-hover {
     @apply transition-all duration-300 hover:z-10;
     transform: scale(1);
     filter: brightness(0.8);
+    will-change: transform, filter;
   }
   
   .gallery-item-hover:hover {
@@ -49,23 +68,46 @@
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   }
   
-  /* Image tilt effect */
+  /* Image tilt effect - optimized for GPU acceleration */
   .tilt-effect {
     @apply transition-transform duration-300;
     transform: perspective(1000px) rotateX(0) rotateY(0);
+    will-change: transform;
   }
   
   .tilt-effect:hover {
     transform: perspective(1000px) rotateX(5deg) rotateY(-5deg);
   }
+  
+  /* Performance class for elements that animate frequently */
+  .optimize-animation {
+    will-change: transform, opacity;
+    transition: transform var(--animation-speed-normal) ease, 
+                opacity var(--animation-speed-normal) ease;
+  }
+  
+  /* Transition utility classes with consistent timing */
+  .transition-fast {
+    transition-duration: var(--animation-speed-fast);
+  }
+  
+  .transition-normal {
+    transition-duration: var(--animation-speed-normal);
+  }
+  
+  .transition-slow {
+    transition-duration: var(--animation-speed-slow);
+  }
 }
 
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
+/* Smooth scrolling - only on non-reduced-motion environments */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar - simplified for better performance */
 ::-webkit-scrollbar {
   width: 10px;
 }
@@ -99,5 +141,30 @@ html {
   }
   50% {
     box-shadow: 0 0 20px rgba(124, 58, 237, 0.8);
+  }
+}
+
+/* Pre-defined animation classes */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+  will-change: box-shadow;
+}
+
+/* Media query for reduced animations */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .animate-float, .animate-glow, .floating-animation {
+    animation: none !important;
   }
 }
